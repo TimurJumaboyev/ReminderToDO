@@ -10,8 +10,10 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.res.ColorStateList
 import android.graphics.Color
+import android.nfc.Tag
 import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
@@ -47,13 +49,16 @@ class AddScreen : BaseFragment(R.layout.screen_add) {
     private var NOTIFICATION_ID = 123
     private lateinit var pendingIntent: PendingIntent
 
+    private val TAG = "AddScreen"
+
+
     override fun onCreated(view: View, savedInstanceState: Bundle?) {
         checkPermissionOrStart()
         setFloatButton()
 
         val type = requireArguments().getInt("type")
 
-        if (type == 1) {
+        if (type == 0) {
             setData()
         } else {
             setUpdateData()
@@ -147,15 +152,6 @@ class AddScreen : BaseFragment(R.layout.screen_add) {
         val pendingIntent: PendingIntent =
             PendingIntent.getActivity(requireContext(), 0, intent, PendingIntent.FLAG_IMMUTABLE)
 
-        val snoozeIntent = Intent(requireContext(), ReminderScreen::class.java).apply {
-            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-        }
-        val snoozePendingIntent: PendingIntent = PendingIntent.getActivity(requireContext(),
-            0,
-            snoozeIntent,
-            PendingIntent.FLAG_IMMUTABLE)
-
-        //   val myBitmap= BitmapFactory.decodeResource(resources,R.drawable.ozero)
 
         val builder = NotificationCompat.Builder(requireContext(), CHANNEL_ID)
             .setSmallIcon(R.drawable.ic_awesome)
@@ -166,7 +162,6 @@ class AddScreen : BaseFragment(R.layout.screen_add) {
             .setContentText(R.string.channel_description.toString())
             .setPriority(NotificationCompat.PRIORITY_HIGH)
 
-        //   .addAction( R.drawable.play, getString(R.string.snooze),snoozePendingIntent)
         return builder
     }
 
@@ -211,7 +206,13 @@ class AddScreen : BaseFragment(R.layout.screen_add) {
 
             val data = NotCompleted(title, description, date)
             vm.insertNotCompleted(data)
+
+            Log.d(TAG,"$title,$description,$date")
+
             findNavController().popBackStack()
+
+            Toast.makeText(requireContext(), "$title, $description,$date", Toast.LENGTH_SHORT).show()
+
             createNotificationChannel()
             val builder = createNotification()
             with(NotificationManagerCompat.from(requireContext())) {
