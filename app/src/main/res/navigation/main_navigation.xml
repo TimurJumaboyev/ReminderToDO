@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main_navigation"
+    app:startDestination="@id/splashScreen">
+
+
+    <fragment
+        android:id="@+id/splashScreen"
+        android:name="uz.isystem.remindertodo.ui.fragments.splash.SplashScreen"
+        android:label="screen_splash"
+        tools:layout="@layout/screen_splash" >
+        <action
+            android:id="@+id/action_splashScreen_to_reminderScreen"
+            app:destination="@id/reminderScreen" />
+    </fragment>
+    <fragment
+        android:id="@+id/reminderScreen"
+        android:name="uz.isystem.remindertodo.ui.fragments.reminder.ReminderScreen"
+        android:label="screen_reminder"
+        tools:layout="@layout/screen_reminder" >
+        <action
+            android:id="@+id/action_reminderScreen_to_addScreen"
+            app:destination="@id/addScreen" />
+        <action
+            android:id="@+id/action_reminderScreen_to_complatedPage"
+            app:destination="@id/complatedPage" />
+        <action
+            android:id="@+id/action_reminderScreen_to_notComplatedPage"
+            app:destination="@id/notComplatedPage" />
+    </fragment>
+    <fragment
+        android:id="@+id/addScreen"
+        android:name="uz.isystem.remindertodo.ui.fragments.add.AddScreen"
+        android:label="screen_add"
+        tools:layout="@layout/screen_add" />
+    <fragment
+        android:id="@+id/complatedPage"
+        android:name="uz.isystem.remindertodo.ui.fragments.reminder.complate.CompletedPage"
+        android:label="page_complated"
+        tools:layout="@layout/page_completed" />
+    <fragment
+        android:id="@+id/notComplatedPage"
+        android:name="uz.isystem.remindertodo.ui.fragments.reminder.notcompleted.NotCompletedPage"
+        android:label="page_not_complated"
+        tools:layout="@layout/page_not_completed" >
+        <action
+            android:id="@+id/action_notComplatedPage_to_addScreen"
+            app:destination="@id/addScreen" />
+    </fragment>
+</navigation>
