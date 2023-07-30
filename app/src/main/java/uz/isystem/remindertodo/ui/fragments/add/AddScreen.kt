@@ -2,6 +2,7 @@ package uz.isystem.remindertodo.ui.fragments.add
 
 import android.Manifest
 import android.app.AlarmManager
+import android.app.AlertDialog
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
@@ -43,17 +44,23 @@ class AddScreen : BaseFragment(R.layout.screen_add) {
     private val binding by viewBinding(ScreenAddBinding::bind)
     private val vm: ReminderViewModel by viewModels<ReminderViewModelImp>()
     private lateinit var picker: MaterialTimePicker
-    private lateinit var alarmManager: AlarmManager
-    private lateinit var calendar: Calendar
-    val CHANNEL_ID = "channel1"
+    private val CHANNEL_ID = "channel1"
     private var NOTIFICATION_ID = 123
-    private lateinit var pendingIntent: PendingIntent
-
     private val TAG = "AddScreen"
 
 
-    override fun onCreated(view: View, savedInstanceState: Bundle?) {
-        checkPermissionOrStart()
+    private val requestPermissionLauncher = registerForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { isGranted: Boolean ->
+        if (isGranted) {
+            Toast.makeText(requireContext(), "Permission granted", Toast.LENGTH_SHORT).show()
+        } else {
+            Toast.makeText(requireContext(), "Permission denied", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
         setFloatButton()
 
         val type = requireArguments().getInt("type")
@@ -63,17 +70,16 @@ class AddScreen : BaseFragment(R.layout.screen_add) {
         } else {
             setUpdateData()
         }
-
-
         binding.timeBtn.setOnClickListener {
             setTime()
-
         }
+    }
+
+    override fun onCreated(view: View, savedInstanceState: Bundle?) {
 
     }
 
     private fun setUpdateData() {
-
         val title1 = requireArguments().getString("title")
         val date1 = requireArguments().getString("date")
         val description1 = requireArguments().getString("description")
@@ -83,9 +89,7 @@ class AddScreen : BaseFragment(R.layout.screen_add) {
         binding.description.setText(description1)
         binding.timeText.text = date1
 
-
         binding.doneBtn.setOnClickListener {
-
             val title = binding.title.text.toString()
             val description = binding.description.text.toString()
             val date = binding.timeText.text.toString()
@@ -104,58 +108,49 @@ class AddScreen : BaseFragment(R.layout.screen_add) {
             data.id = reminderId
             vm.update(data)
             findNavController().popBackStack()
-            /*    createNotificationChannel()
-                val builder= createNotification()
-                with(NotificationManagerCompat.from(requireContext())) {
-                    notify(NOTIFICATION_ID, builder.build())
-                }*/
-//           setAlarm2()
         }
-
     }
-
-
 
     private fun checkPermissionOrStart() {
         when {
             ContextCompat.checkSelfPermission(
-                requireContext(), Manifest.permission.POST_NOTIFICATIONS
-            )
-                    == PackageManager
-                .PERMISSION_GRANTED -> {
+                requireContext(), Manifest.permission.SET_ALARM
+            ) == PackageManager.PERMISSION_GRANTED -> {
+                setTime()
             }
-            shouldShowRequestPermissionRationale(Manifest.permission.POST_NOTIFICATIONS) -> {
-                requestPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+            shouldShowRequestPermissionRationale(Manifest.permission.SET_ALARM) -> {
+                AlertDialog.Builder(requireContext())
+                    .setTitle("Permission Request")
+                    .setMessage("This permission is needed to set alarm")
+                    .setPositiveButton("OK") { _, _ ->
+                        requestPermissionLauncher.launch(Manifest.permission.SET_ALARM)
+                    }
+                    .setNegativeButton("Cancel") { dialog, _ ->
+                        dialog.dismiss()
+                    }
+                    .create()
+                    .show()
             }
             else -> {
-                requestPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+                requestPermissionLauncher.launch(Manifest.permission.SET_ALARM)
             }
-        }
-    }
-
-    val requestPermissionLauncher = registerForActivityResult(
-        ActivityResultContracts.RequestPermission()
-    ) { isGranted: Boolean ->
-        if (isGranted) {
-
-        } else {
-
         }
     }
 
     private fun createNotification(): NotificationCompat.Builder {
-
-
         val intent = Intent(requireContext(), ReminderScreen::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
         }
-        val pendingIntent: PendingIntent =
-            PendingIntent.getActivity(requireContext(), 0, intent, PendingIntent.FLAG_IMMUTABLE)
 
+        val pendingIntent: PendingIntent = PendingIntent.getActivity(
+            requireContext(),
+            0,
+            intent,
+            PendingIntent.FLAG_IMMUTABLE
+        )
 
         val builder = NotificationCompat.Builder(requireContext(), CHANNEL_ID)
             .setSmallIcon(R.drawable.ic_awesome)
-
             .setContentTitle("Reminder Application")
             .setContentIntent(pendingIntent)
             .setAutoCancel(true)
@@ -174,18 +169,22 @@ class AddScreen : BaseFragment(R.layout.screen_add) {
             .build()
 
         picker.show(parentFragmentManager, "notCompleted")
+
         picker.addOnPositiveButtonClickListener {
             if (picker.hour >= 0) {
                 binding.timeText.text =
-                    String.format("%02d", picker.hour) + ":" + String.format("%02d", picker.minute)
+                    String.format("%02d", picker.hour) + ":" + String.format(
+                        "%02d",
+                        picker.minute
+                    )
             }
 
             val calendar = Calendar.getInstance()
             calendar[Calendar.HOUR_OF_DAY] = picker.hour
             calendar[Calendar.MINUTE] = picker.minute
+            setAlarm(calendar.timeInMillis)
         }
     }
-
 
     private fun setData() {
         binding.doneBtn.setOnClickListener {
@@ -198,12 +197,10 @@ class AddScreen : BaseFragment(R.layout.screen_add) {
                 binding.title.error = "Write anything"
                 return@setOnClickListener
             }
-
             if (description.isEmpty()) {
                 binding.description.error = "Write anything"
                 return@setOnClickListener
             }
-
             val data = NotCompleted(title, description, date)
             vm.insertNotCompleted(data)
 
@@ -218,7 +215,6 @@ class AddScreen : BaseFragment(R.layout.screen_add) {
             with(NotificationManagerCompat.from(requireContext())) {
                 notify(NOTIFICATION_ID, builder.build())
             }
-//           setAlarm2()
         }
     }
 
@@ -227,45 +223,7 @@ class AddScreen : BaseFragment(R.layout.screen_add) {
         binding.doneBtn.backgroundTintList = ColorStateList.valueOf(color)
     }
 
-    private fun setAlarm(notCompleted: NotCompleted) {
-        // creating alarmManager instance
-        val alarmManager = activity?.getSystemService(Context.ALARM_SERVICE) as AlarmManager
-        // adding intent and pending intent to go to AlarmReceiver Class in future
-        val intent = Intent(requireContext(), AlarmReceiver::class.java)
-        intent.putExtra("notCompleted", notCompleted)
-        val pendingIntent = PendingIntent.getBroadcast(requireContext(),
-            notCompleted.id,
-            intent,
-            PendingIntent.FLAG_IMMUTABLE)
-        // when using setAlarmClock() it displays a notification until alarm rings and when pressed it takes us to mainActivity
-        val mainActivityIntent = Intent(requireContext(), MainActivity::class.java)
-        val basicPendingIntent = PendingIntent.getActivity(requireContext(),
-            notCompleted.id,
-            mainActivityIntent,
-            PendingIntent.FLAG_IMMUTABLE)
-        // creating clockInfo instance
-        val clockInfo = AlarmManager.AlarmClockInfo(notCompleted.date.toLong(), basicPendingIntent)
-        // setting the alarm
-        alarmManager.setAlarmClock(clockInfo, pendingIntent)
-    }
-
-    private fun setAlarm2() {
-        val alarmManager = requireContext().getSystemService(Context.ALARM_SERVICE) as AlarmManager
-        // adding intent and pending intent to go to AlarmReceiver Class in future
-        val intent = Intent(requireContext(), AlarmReceiver::class.java)
-        intent.putExtra("notCompleted", 1)
-        pendingIntent =
-            PendingIntent.getBroadcast(requireContext(), 0, intent, PendingIntent.FLAG_IMMUTABLE)
-
-        alarmManager.setRepeating(
-            AlarmManager.RTC_WAKEUP, calendar.timeInMillis,
-            AlarmManager.INTERVAL_DAY, pendingIntent
-        )
-        Toast.makeText(context, "Alarm set", Toast.LENGTH_SHORT).show()
-    }
-
     private fun createNotificationChannel() {
-
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val name = getString(R.string.channel_name)
             val descriptionText = getString(R.string.channel_description)
@@ -274,7 +232,6 @@ class AddScreen : BaseFragment(R.layout.screen_add) {
             channel.description = descriptionText
             channel.enableLights(true)
             channel.enableVibration(true)
-            //  setAllowBubbles(true)
             channel.setShowBadge(true)
 
             val notificationManager =
@@ -283,16 +240,20 @@ class AddScreen : BaseFragment(R.layout.screen_add) {
         }
     }
 
-    /*
-    private fun cancelAlarm(){
-
-        alarmManager= context?.getSystemService(ALARM_SERVICE) as AlarmManager
-        val intent=Intent(requireContext(), AlarmReceiver::class.java)
-
-        pendingIntent=PendingIntent.getBroadcast(requireContext(),0,intent,0)
-        alarmManager.cancel(pendingIntent)
-
-        Toast.makeText(requireContext(), "Alarm Cancelled", Toast.LENGTH_SHORT).show()
+    private fun setAlarm(timeInMillis: Long) {
+        val alarmManager = requireContext().getSystemService(Context.ALARM_SERVICE) as AlarmManager
+        val intent = Intent(requireContext(), AlarmReceiver::class.java)
+        val pendingIntent = PendingIntent.getBroadcast(
+            requireContext(),
+            0,
+            intent,
+            PendingIntent.FLAG_UPDATE_CURRENT
+        )
+        alarmManager.setExact(
+            AlarmManager.ELAPSED_REALTIME,
+            timeInMillis,
+            pendingIntent
+        )
+        Toast.makeText(requireContext(), "Alarm is set", Toast.LENGTH_SHORT).show()
     }
-    */
 }

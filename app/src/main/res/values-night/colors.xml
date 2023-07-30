@@ -8,16 +8,16 @@
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
 
-    <color name="text_color">#97F6DB</color>
-    <color name="text_color2">#C3ECED</color>
+    <color name="text_color">#97D8F6</color>
+    <color name="text_color2">#C3E1ED</color>
     <color name="background_color">#172747</color>
     <color name="background_color2">#223761</color>
     <color name="green">#BCBCBC</color>
     <color name="grad_center">#AAAAAA</color>
     <color name="uncom_gradient_line">#1E3D57</color>
     <color name="uncom_gradient_backg">#1F1F4A</color>
-    <color name="com_gradient_line">#0E3E47</color>
+    <color name="com_gradient_line">#0E3047</color>
     <color name="com_gradient_backg">#021947</color>
-    <color name="check">#90B6AF</color>
-    <color name="delete">#2CF6DE</color>
+    <color name="check">#90ADB6</color>
+    <color name="delete">#D16262</color>
 </resources>

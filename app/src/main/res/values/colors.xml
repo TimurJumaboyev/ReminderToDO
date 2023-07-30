@@ -9,15 +9,15 @@
     <color name="white">#FFFFFFFF</color>
 
     <color name="text_color">#000000</color>
-    <color name="text_color2">#6A6A6A</color>
-    <color name="background_color">#D5F4EE</color>
-    <color name="background_color2">#E0F6F2</color>
-    <color name="green">#36C773</color>
-    <color name="grad_center">#9FEFE0</color>
+    <color name="text_color2">#535353</color>
+    <color name="background_color">#F3F9FD</color>
+    <color name="background_color2">#E0EFF6</color>
+    <color name="green">#369EC7</color>
+    <color name="grad_center">#9FD3EF</color>
     <color name="uncom_gradient_line">#526C9E</color>
     <color name="uncom_gradient_backg">#E5F0F8</color>
-    <color name="com_gradient_line">#529E6E</color>
-    <color name="com_gradient_backg">#D5F4DC</color>
+    <color name="com_gradient_line">#52889E</color>
+    <color name="com_gradient_backg">#D5EDF4</color>
     <color name="check">#02205A</color>
     <color name="delete">#4C0018</color>
 </resources>

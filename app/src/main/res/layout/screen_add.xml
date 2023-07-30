@@ -103,6 +103,7 @@
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/done_btn"
         android:background="@color/background_color"
+        android:backgroundTint="#349FCA"
         android:src="@drawable/ic_round_done_24"
         android:layout_width="wrap_content"
         android:layout_margin="25dp"
